@@ -3,127 +3,889 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppFlowy to Markdown Converter - Free Online Tool</title>
-    <meta name="description" content="Convert AppFlowy JSON files from backups to Markdown for free. No installation required.">
-    <link rel="stylesheet" href="style.css">
+    <title>AppFlowy to Markdown Converter</title>
+    <style>
+        :root {
+            --ios-bg: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-purple: #7e50b5;
+            --ios-gray: #8e8e93;
+            --ios-gray-light: #c7c7cc;
+            --ios-text: #000000;
+            --ios-text-secondary: #3c3c43;
+            --ios-border: #d1d1d6;
+            --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --ios-radius: 14px;
+            --ios-radius-small: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            width: 100%;
+            padding: 0 16px;
+        }
+
+        .ios-card {
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: var(--ios-shadow);
+            border: 1px solid var(--ios-border);
+        }
+
+        .ios-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--ios-purple);
+            color: white;
+            border: none;
+            border-radius: var(--ios-radius-small);
+            font-size: 17px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            margin: 8px 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-button:active {
+            opacity: 0.8;
+        }
+
+        .ios-button-secondary {
+            background: var(--ios-card);
+            color: var(--ios-purple);
+            border: 1px solid var(--ios-border);
+        }
+
+        .ios-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ios-segmented-control {
+            display: flex;
+            background: var(--ios-gray-light);
+            border-radius: var(--ios-radius-small);
+            padding: 3px;
+            margin: 16px 0;
+        }
+
+        .ios-segment {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ios-text);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ios-segment.active {
+            background: var(--ios-card);
+            color: var(--ios-text);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--ios-card);
+            border: 2px dashed var(--ios-border);
+            border-radius: var(--ios-radius);
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--ios-purple);
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--ios-purple);
+            margin-bottom: 16px;
+        }
+
+        .upload-area h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            color: var(--ios-gray);
+            font-size: 15px;
+        }
+
+        .file-list {
+            margin: 16px 0;
+        }
+
+        .file-item {
+            padding: 12px 16px;
+            background: var(--ios-card);
+            border: 1px solid var(--ios-border);
+            border-radius: var(--ios-radius-small);
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item-name {
+            font-weight: 500;
+        }
+
+        .file-item-size {
+            color: var(--ios-gray);
+            font-size: 14px;
+        }
+
+        .file-item-remove {
+            color: #ff3b30;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .progress-container {
+            margin: 16px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--ios-gray-light);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-purple);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--ios-gray);
+        }
+
+        .results {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .result-item {
+            padding: 16px;
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            margin: 8px 0;
+            border-left: 4px solid var(--ios-purple);
+        }
+
+        .result-item.success {
+            border-left-color: #34c759;
+        }
+
+        .result-item.error {
+            border-left-color: #ff3b30;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--ios-gray);
+            font-size: 17px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--ios-gray);
+            font-size: 14px;
+            border-top: 1px solid var(--ios-border);
+            margin-top: 32px;
+        }
+
+        .footer-links {
+            margin: 16px 0;
+        }
+
+        .footer-links a {
+            color: var(--ios-purple);
+            text-decoration: none;
+            margin: 0 8px;
+            font-size: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ios-bg: #000000;
+                --ios-card: #1c1c1e;
+                --ios-purple: #7e50b5;
+                --ios-gray: #8e8e93;
+                --ios-gray-light: #38383a;
+                --ios-text: #ffffff;
+                --ios-text-secondary: #ebebf5;
+                --ios-border: #38383a;
+            }
+        }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-exchange-alt"></i> AppFlowy to Markdown Converter</h1>
-            <p class="subtitle">Free online tool to convert your AppFlowy notes to Markdown format</p>
+    <div class="container">
+        <div class="hero">
+            <h1><i class="fas fa-exchange-alt"></i> AppFlowy to Markdown</h1>
+            <p>Convert your AppFlowy notes instantly</p>
         </div>
-    </header>
 
-    <main class="container">
-        <section class="hero">
-            <div class="hero-content">
-                <h2>Convert AppFlowy Notes Instantly</h2>
-                <p>No installation. No registration. Completely free.</p>
-                <div class="cta-buttons">
-                    <a href="single.html" class="btn btn-primary">
-                        <i class="fas fa-file"></i> Single File Converter
-                    </a>
-                    <a href="batch.html" class="btn btn-secondary">
-                        <i class="fas fa-folder"></i> Batch Converter
-                    </a>
+        <div class="ios-card">
+            <h2 style="margin-bottom: 16px; font-size: 22px; font-weight: 700;">Convert AppFlowy Files</h2>
+            
+            <div class="ios-segmented-control">
+                <div class="ios-segment active" id="singleSegment" onclick="selectMode('single')">
+                    <i class="fas fa-file"></i> Single File
+                </div>
+                <div class="ios-segment" id="batchSegment" onclick="selectMode('batch')">
+                    <i class="fas fa-folder"></i> Batch
                 </div>
             </div>
-            <div class="hero-image">
-                <div class="demo-box">
-                    <div class="file-input">📄 notes.json</div>
-                    <div class="arrow">↓</div>
-                    <div class="file-output">📝 notes.md</div>
-                </div>
-            </div>
-        </section>
 
-        <section class="features">
-            <h2>Why Use This Converter?</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <i class="fas fa-lock"></i>
-                    <h3>100% Private</h3>
-                    <p>All processing happens in your browser. No data is uploaded to any server.</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Fast & Efficient</h3>
-                    <p>Convert multiple files instantly. No waiting, no limitations.</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-code"></i>
-                    <h3>Open Source</h3>
-                    <p>View and modify the code on GitHub. Transparent and trustworthy.</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-desktop"></i>
-                    <h3>Cross-Platform</h3>
-                    <p>Works on Windows, Mac, Linux, and mobile browsers.</p>
-                </div>
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3 id="uploadTitle">Drop JSON file here</h3>
+                <p id="uploadSubtitle">or tap to browse</p>
+                <p style="font-size: 13px; margin-top: 8px; color: var(--ios-gray);">                	
+                </p>
             </div>
-        </section>
 
-        <section class="how-to">
-            <h2>How to Use</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Export from AppFlowy</h3>
-                    <p>In AppFlowy, go to Settings → Backup → Export as ZIP</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Extract JSON Files</h3>
-                    <p>Unzip the backup and find the .json files inside</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Convert Online</h3>
-                    <p>Upload files here and get Markdown instantly</p>
-                </div>
-            </div>
-        </section>
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
 
-        <section class="supported-formats">
-            <h2>Supported Format</h2>
-            <div class="format">
-            	<div class="format-icon">📄</div>
-                    <h4>JSON Files</h4>
-                    <p>Individual .json files from backup</p>
-                </div>
-            </div>
-        </section>
-    </main>
+            <div class="file-list" id="fileList"></div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>AppFlowy Markdown Converter</h3>
-                    <p>Free, open-source tool for the AppFlowy community.</p>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="footer-section">
-                    <h3>Links</h3>
-                    <ul>
-                        <li><a href="https://github.com/appflowy-io/appflowy" target="_blank">AppFlowy Official</a></li>
-                        <li><a href="https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/" target="_blank">Source Code</a></li>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="https://t.me/lildavegoth">lildavegoth</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Need Help?</h3>
-                    <p>Open an issue on GitHub or contact lildavegoth above.</p>
-                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
             </div>
-            <div class="footer-bottom">
-                <p>Made with ❤️ for the AppFlowy community | Privacy First Design</p>
+
+            <button class="ios-button" id="convertBtn" onclick="convertFiles()">
+                <i class="fas fa-sync-alt"></i> Convert to Markdown
+            </button>
+
+            <button class="ios-button ios-button-secondary hidden" id="downloadBtn" onclick="downloadAll()">
+                <i class="fas fa-download"></i> Download All
+            </button>
+        </div>
+
+        <div class="results" id="results">
+            <h3 style="margin-bottom: 16px; font-size: 17px; font-weight: 600;">Conversion Results</h3>
+            <div id="resultsList"></div>
+        </div>
+
+        <div class="ios-card">
+            <h2 style="margin-bottom: 16px; font-size: 22px; font-weight: 700;">How It Works</h2>
+            
+            <div style="margin-top: 16px;">
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: 600; font-size: 14px;">1</div>
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 600;">Export from AppFlowy</h3>
+                        <p style="color: var(--ios-gray); font-size: 15px; margin-top: 4px;">Settings → Backup → Export as ZIP</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: 600; font-size: 14px;">2</div>
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 600;">Extract JSON Files</h3>
+                        <p style="color: var(--ios-gray); font-size: 15px; margin-top: 4px;">Unzip and find .json files</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="background: var(--ios-purple); color: white; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: 600; font-size: 14px;">3</div>
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 600;">Upload & Convert</h3>
+                        <p style="color: var(--ios-gray); font-size: 15px; margin-top: 4px;">Upload here and download Markdown</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
 
-    <script src="script.js"></script>
+        <div class="footer">
+            <p>Made with <i class="fas fa-heart" style="color: #ff2d55;"></i> for AppFlowy Community</p>
+            <div class="footer-links">
+                <a href="https://github.com/appflowy-io/appflowy" target="_blank">AppFlowy</a>
+                <a href="https://t.me/lildavegoth" target="_blank">Contact</a>
+            </div>
+            <p style="margin-top: 16px; font-size: 13px;">100% browser-based • No data leaves your device</p>
+        </div>
+    </div>
+
+    <script>
+        // AppFlowy Converter - Works with actual AppFlowy JSON structure
+        const converter = {
+            files: [],
+            results: [],
+            mode: 'single',
+            
+            init() {
+                this.setupEventListeners();
+            },
+            
+            setupEventListeners() {
+                const fileInput = document.getElementById('fileInput');
+                const uploadArea = document.getElementById('uploadArea');
+                
+                fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+                
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+                
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+                
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    this.handleFiles(e.dataTransfer.files);
+                });
+            },
+            
+            handleFiles(fileList) {
+                const validFiles = Array.from(fileList).filter(file => 
+                    file.name.toLowerCase().endsWith('.json')
+                );
+                
+                if (validFiles.length === 0) {
+                    this.showNotification('Please select .json files', 'error');
+                    return;
+                }
+                
+                // Single mode: keep only first file
+                if (this.mode === 'single' && validFiles.length > 1) {
+                    validFiles.splice(1);
+                    this.showNotification('Single mode: Using first file only', 'info');
+                }
+                
+                // Clear previous files in single mode
+                if (this.mode === 'single') {
+                    this.files = [];
+                }
+                
+                validFiles.forEach(file => {
+                    if (!this.files.some(f => f.name === file.name && f.size === file.size)) {
+                        this.files.push({
+                            name: file.name,
+                            size: file.size,
+                            file: file,
+                            content: null,
+                            markdown: null,
+                            success: false
+                        });
+                    }
+                });
+                
+                this.updateFileDisplay();
+            },
+            
+            updateFileDisplay() {
+                const fileListDiv = document.getElementById('fileList');
+                const uploadTitle = document.getElementById('uploadTitle');
+                const uploadSubtitle = document.getElementById('uploadSubtitle');
+                
+                if (this.files.length === 0) {
+                    fileListDiv.innerHTML = '';
+                    uploadTitle.textContent = this.mode === 'single' ? 'Drop JSON file here' : 'Drop JSON files here';
+                    uploadSubtitle.textContent = 'or tap to browse';
+                    return;
+                }
+                
+                let html = '';
+                this.files.forEach((file, index) => {
+                    const sizeKB = (file.size / 1024).toFixed(1);
+                    html += `
+                        <div class="file-item">
+                            <div>
+                                <div class="file-item-name">${file.name}</div>
+                                <div class="file-item-size">${sizeKB} KB</div>
+                            </div>
+                            <button class="file-item-remove" onclick="converter.removeFile(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                fileListDiv.innerHTML = html;
+                uploadTitle.textContent = `${this.files.length} file${this.files.length > 1 ? 's' : ''} selected`;
+                uploadSubtitle.textContent = 'Ready to convert';
+            },
+            
+            removeFile(index) {
+                const removedFile = this.files[index];
+                this.files.splice(index, 1);
+                this.updateFileDisplay();
+                this.showNotification(`Removed: ${removedFile.name}`, 'info');
+            },
+            
+            selectMode(mode) {
+                this.mode = mode;
+                document.getElementById('singleSegment').classList.toggle('active', mode === 'single');
+                document.getElementById('batchSegment').classList.toggle('active', mode === 'batch');
+                
+                const fileInput = document.getElementById('fileInput');
+                fileInput.multiple = mode === 'batch';
+                
+                const uploadTitle = document.getElementById('uploadTitle');
+                uploadTitle.textContent = mode === 'single' ? 'Drop JSON file here' : 'Drop JSON files here';
+                
+                // If switching to single mode and have multiple files, keep only first
+                if (mode === 'single' && this.files.length > 1) {
+                    this.files = [this.files[0]];
+                    this.updateFileDisplay();
+                }
+            },
+            
+            async convertFiles() {
+                if (this.files.length === 0) {
+                    this.showNotification('Please select files first', 'error');
+                    return;
+                }
+                
+                const convertBtn = document.getElementById('convertBtn');
+                const progressContainer = document.getElementById('progressContainer');
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                const resultsDiv = document.getElementById('results');
+                const resultsList = document.getElementById('resultsList');
+                const downloadBtn = document.getElementById('downloadBtn');
+                
+                // Reset
+                this.results = [];
+                convertBtn.disabled = true;
+                convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+                progressContainer.classList.remove('hidden');
+                progressFill.style.width = '0%';
+                downloadBtn.classList.add('hidden');
+                resultsDiv.classList.add('hidden');
+                resultsList.innerHTML = '';
+                
+                let processed = 0;
+                const total = this.files.length;
+                
+                for (let i = 0; i < this.files.length; i++) {
+                    const fileObj = this.files[i];
+                    
+                    try {
+                        // Read file
+                        const content = await this.readFile(fileObj.file);
+                        fileObj.content = content;
+                        
+                        // Parse JSON
+                        const jsonData = JSON.parse(content);
+                        
+                        // Convert to Markdown
+                        const markdown = this.convertToMarkdown(jsonData);
+                        fileObj.markdown = markdown;
+                        fileObj.success = true;
+                        
+                        this.results.push({
+                            name: fileObj.name,
+                            success: true,
+                            markdown: markdown
+                        });
+                        
+                        this.showResult(fileObj.name, true, null);
+                        
+                    } catch (error) {
+                        fileObj.success = false;
+                        this.results.push({
+                            name: fileObj.name,
+                            success: false,
+                            error: error.message
+                        });
+                        
+                        this.showResult(fileObj.name, false, error.message);
+                    }
+                    
+                    // Update progress
+                    processed++;
+                    const progress = (processed / total) * 100;
+                    progressFill.style.width = `${progress}%`;
+                    progressText.textContent = `Processing ${processed}/${total} files`;
+                }
+                
+                // Completion
+                convertBtn.disabled = false;
+                convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert to Markdown';
+                progressContainer.classList.add('hidden');
+                
+                const successCount = this.results.filter(r => r.success).length;
+                if (successCount > 0) {
+                    downloadBtn.classList.remove('hidden');
+                    this.showNotification(`Converted ${successCount}/${total} files successfully`, 'success');
+                } else {
+                    this.showNotification('Failed to convert files', 'error');
+                }
+            },
+            
+            readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    reader.readAsText(file);
+                });
+            },
+            
+            convertToMarkdown(jsonData) {
+                console.log('Converting JSON:', jsonData);
+                
+                let markdown = '';
+                
+                // Get blocks structure to understand document hierarchy
+                const blocks = jsonData.blocks || {};
+                const textMap = jsonData.meta?.text_map || {};
+                const childrenMap = jsonData.meta?.children_map || {};
+                
+                // Find root block (page)
+                const rootBlockId = jsonData.page_id;
+                if (!rootBlockId || !childrenMap[rootBlockId]) {
+                    return '# Document\n\nCould not parse document structure.';
+                }
+                
+                // Get root children in order
+                const rootChildren = childrenMap[rootBlockId] || [];
+                
+                // Process each block in order
+                for (const blockId of rootChildren) {
+                    const block = blocks[blockId];
+                    if (!block) continue;
+                    
+                    const blockType = block.ty;
+                    const externalId = block.external_id;
+                    const textDelta = textMap[externalId];
+                    
+                    if (!textDelta) continue;
+                    
+                    // Parse delta JSON
+                    let delta;
+                    try {
+                        delta = JSON.parse(textDelta);
+                    } catch (e) {
+                        console.warn('Failed to parse delta for', externalId, textDelta);
+                        continue;
+                    }
+                    
+                    // Convert delta to text with formatting
+                    const text = this.parseDelta(delta);
+                    
+                    // Apply block formatting
+                    switch (blockType) {
+                        case 'heading':
+                            const level = block.data?.level || 1;
+                            markdown += '#'.repeat(level) + ' ' + text + '\n\n';
+                            break;
+                            
+                        case 'paragraph':
+                            markdown += text + '\n\n';
+                            break;
+                            
+                        case 'quote':
+                            const lines = text.split('\n');
+                            lines.forEach(line => {
+                                if (line.trim()) markdown += '> ' + line + '\n';
+                            });
+                            markdown += '\n';
+                            break;
+                            
+                        case 'numbered_list':
+                            // Check if this is part of a list
+                            markdown += '1. ' + text + '\n';
+                            break;
+                            
+                        case 'bullet_list':
+                            markdown += '- ' + text + '\n';
+                            break;
+                            
+                        default:
+                            markdown += text + '\n\n';
+                    }
+                }
+                
+                // If no content was found, try to extract from text map directly
+                if (!markdown.trim()) {
+                    for (const [key, deltaStr] of Object.entries(textMap)) {
+                        try {
+                            const delta = JSON.parse(deltaStr);
+                            const text = this.parseDelta(delta);
+                            if (text.trim()) {
+                                markdown += text + '\n\n';
+                            }
+                        } catch (e) {
+                            // Skip invalid delta
+                        }
+                    }
+                }
+                
+                return markdown.trim() || '# Empty Document\n\nNo content found.';
+            },
+            
+            parseDelta(delta) {
+                if (!Array.isArray(delta)) return '';
+                
+                let result = '';
+                
+                for (const item of delta) {
+                    if (typeof item === 'string') {
+                        result += item;
+                    } else if (item.insert) {
+                        let text = item.insert;
+                        
+                        // Apply formatting if attributes exist
+                        if (item.attributes) {
+                            if (item.attributes.bold) {
+                                text = `**${text}**`;
+                            }
+                            if (item.attributes.italic) {
+                                text = `*${text}*`;
+                            }
+                            if (item.attributes.underline) {
+                                text = `<u>${text}</u>`;
+                            }
+                            if (item.attributes.strikethrough) {
+                                text = `~~${text}~~`;
+                            }
+                            if (item.attributes.code) {
+                                text = `\`${text}\``;
+                            }
+                            if (item.attributes.link) {
+                                text = `[${text}](${item.attributes.link})`;
+                            }
+                        }
+                        
+                        result += text;
+                    }
+                }
+                
+                return result;
+            },
+            
+            showResult(filename, success, error) {
+                const resultsList = document.getElementById('resultsList');
+                const resultsDiv = document.getElementById('results');
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result-item ${success ? 'success' : 'error'}`;
+                
+                if (success) {
+                    resultDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-check-circle" style="color: #34c759;"></i>
+                            <strong>${filename}</strong>
+                        </div>
+                        <div style="color: var(--ios-gray); font-size: 14px; margin-top: 4px;">Converted successfully</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-times-circle" style="color: #ff3b30;"></i>
+                            <strong>${filename}</strong>
+                        </div>
+                        <div style="color: var(--ios-gray); font-size: 14px; margin-top: 4px;">Error: ${error || 'Unknown error'}</div>
+                    `;
+                }
+                
+                resultsList.appendChild(resultDiv);
+                resultsDiv.classList.remove('hidden');
+            },
+            
+            downloadAll() {
+                const successfulResults = this.results.filter(r => r.success);
+                
+                if (successfulResults.length === 0) {
+                    this.showNotification('No successful conversions to download', 'error');
+                    return;
+                }
+                
+                if (successfulResults.length === 1 && this.mode === 'single') {
+                    // Single file download
+                    const result = successfulResults[0];
+                    const blob = new Blob([result.markdown], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = result.name.replace(/\.json$/i, '.md');
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.showNotification('File downloaded successfully', 'success');
+                } else {
+                    // Multiple files - need JSZip
+                    if (typeof JSZip === 'undefined') {
+                        this.showNotification('Please wait for JSZip to load', 'error');
+                        return;
+                    }
+                    
+                    const zip = new JSZip();
+                    
+                    successfulResults.forEach(result => {
+                        const mdName = result.name.replace(/\.json$/i, '.md');
+                        zip.file(mdName, result.markdown);
+                    });
+                    
+                    zip.generateAsync({ type: 'blob' })
+                        .then(content => {
+                            const url = URL.createObjectURL(content);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'appflowy_converted_files.zip';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            
+                            this.showNotification(`Downloaded ${successfulResults.length} files as ZIP`, 'success');
+                        })
+                        .catch(error => {
+                            this.showNotification('Error creating ZIP: ' + error.message, 'error');
+                        });
+                }
+            },
+            
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#ff3b30' : type === 'success' ? '#34c759' : '#007aff'};
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: var(--ios-radius-small);
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 1000;
+                    animation: slideIn 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        };
+        
+        // Initialize
+        converter.init();
+        
+        // Global functions for onclick handlers
+        function selectMode(mode) {
+            converter.selectMode(mode);
+        }
+        
+        function convertFiles() {
+            converter.convertFiles();
+        }
+        
+        function downloadAll() {
+            converter.downloadAll();
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- JSZip for ZIP downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
