@@ -21,9 +21,9 @@ A free, open-source web tool to convert AppFlowy backup files to Markdown format
 3. Download the converted Markdown files
 
 ### Self-Hosted Version (Offline Private)
-1. Clone this repository
+1. Download index.html
 2. Open `index.html` in your browser
-3. Use it offline or host on your own server
+3. Use it without data charged
 
 ## Getting Your AppFlowy Files
 
