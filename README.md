@@ -2,7 +2,7 @@
 
 A free, open-source web tool to convert AppFlowy backup files to Markdown format.
 
-🌐 **Live Demo**: [https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/single.html](https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/single.html)
+🌐 **Live Demo**: [https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/l](https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/)
 
 ## Features
 
@@ -16,7 +16,7 @@ A free, open-source web tool to convert AppFlowy backup files to Markdown format
 ## How to Use
 
 ### Online Version
-1. Visit the [live demo](https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/single.html)
+1. Visit the [live demo](https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/)
 2. Drag and drop your AppFlowy `.json` files
 3. Download the converted Markdown files
 
@@ -41,6 +41,8 @@ A free, open-source web tool to convert AppFlowy backup files to Markdown format
 ## Development
 
 Want to contribute or customize?
+
+Created with ❤️ For AppFlowy Community
 
 ```bash
 # Clone the repository
