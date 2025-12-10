@@ -1,282 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Single File Converter - AppFlowy to Markdown</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .converter-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 3rem;
-            margin: 2rem auto;
-            box-shadow: var(--shadow);
-            max-width: 800px;
-        }
+// Single file converter logic
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
 
-        .drop-zone {
-            border: 3px dashed var(--primary);
-            border-radius: var(--border-radius);
-            padding: 4rem 2rem;
-            text-align: center;
-            margin: 2rem 0;
-            cursor: pointer;
-            background: #f8f9ff;
-            transition: var(--transition);
-        }
+    dropZone.addEventListener('click', () => fileInput.click());
 
-        .drop-zone:hover, .drop-zone.dragover {
-            background: #eef2ff;
-            border-color: var(--secondary);
-        }
+    fileInput.addEventListener('change', handleFileSelect);
 
-        .drop-zone i {
-            font-size: 4rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        textarea {
-            width: 100%;
-            height: 300px;
-            padding: 1rem;
-            border: 2px solid #dee2e6;
-            border-radius: var(--border-radius);
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            resize: vertical;
-            margin: 1rem 0;
-        }
-
-        .json-input, .markdown-output {
-            margin: 2rem 0;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .file-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: none;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 2rem;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-file"></i> Single File Converter</h1>
-            <p class="subtitle">Convert individual AppFlowy files to Markdown</p>
-        </div>
-    </header>
-
-    <main class="container">
-        <a href="index.html" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Home
-        </a>
-
-        <div class="converter-container">
-            <h2>Upload AppFlowy File</h2>
-            <p>Drag and drop or click to select your .json or .collab file</p>
-
-            <div class="drop-zone" id="dropZone">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <h3>Drop your file here</h3>
-                <p>or click to browse</p>
-                <p class="small">Supports: .json, .collab, .zip</p>
-            </div>
-            <input type="file" id="fileInput" accept=".json,.collab,.zip" style="display:none;">
-
-            <div id="fileInfo" class="file-info"></div>
-
-            <div class="json-input" style="display:none;">
-                <h3>Or paste JSON directly:</h3>
-                <textarea id="jsonInput" placeholder='Paste your AppFlowy JSON here...'></textarea>
-                <button onclick="convertFromText()" class="btn btn-primary">
-                    <i class="fas fa-sync-alt"></i> Convert from Text
-                </button>
-            </div>
-
-            <div class="markdown-output" style="display:none;">
-                <h3>Converted Markdown:</h3>
-                <textarea id="markdownOutput" readonly></textarea>
-                <div class="action-buttons">
-                    <button onclick="copyMarkdown()" class="btn btn-primary">
-                        <i class="fas fa-copy"></i> Copy Markdown
-                    </button>
-                    <button onclick="downloadMarkdown()" class="btn btn-secondary">
-                        <i class="fas fa-download"></i> Download .md File
-                    </button>
-                    <button onclick="clearAll()" class="btn">
-                        <i class="fas fa-trash"></i> Clear All
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="converter-container">
-            <h2>How to Get Your Files</h2>
-            <ol style="line-height: 2; padding-left: 1.5rem;">
-                <li>In AppFlowy, go to Settings (⚙️)</li>
-                <li>Select "Backup" from the menu</li>
-                <li>Click "Export as ZIP"</li>
-                <li>Extract the ZIP file on your computer</li>
-                <li>Find the .json files inside the extracted folder</li>
-                <li>Upload them here or paste the JSON content</li>
-            </ol>
-        </div>
-    </main>
-
-    <script src="script.js"></script>
-    <script>
-    // Single file converter logic
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const jsonInput = document.querySelector('.json-input');
-        const markdownOutput = document.querySelector('.markdown-output');
-
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', handleFileSelect);
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            handleFileSelect(e.dataTransfer);
-        });
-
-        // Show JSON input option
-        setTimeout(() => {
-            jsonInput.style.display = 'block';
-        }, 1000);
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
     });
 
-    function handleFileSelect(event) {
-        const files = event.files || event.dataTransfer.files;
-        if (files.length === 0) return;
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
 
-        const file = files[0];
-        
-        // Show file info
-        document.getElementById('fileInfo').innerHTML = `
-            <strong>Selected File:</strong> ${file.name}<br>
-            <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
-            <strong>Type:</strong> ${file.type || 'Unknown'}
-        `;
-        document.getElementById('fileInfo').style.display = 'block';
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFileSelect(e);
+    });
 
-        // Read file
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (file.name.endsWith('.json')) {
-                convertJson(e.target.result);
-            } else if (file.name.endsWith('.zip')) {
-                handleZipFile(e.target.result);
-            } else {
-                alert('Unsupported file type. Please use .json or .zip files.');
-            }
-        };
-        
-        if (file.name.endsWith('.zip')) {
-            reader.readAsArrayBuffer(file);
+    // Show JSON input option
+    setTimeout(() => {
+        document.querySelector('.json-input').style.display = 'block';
+    }, 1000);
+});
+
+function handleFileSelect(event) {
+    const files = event.target?.files || event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // Show file info
+    document.getElementById('fileInfo').innerHTML = `
+        <strong>Selected File:</strong> ${file.name}<br>
+        <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+        <strong>Type:</strong> ${file.type || 'Unknown'}
+    `;
+    document.getElementById('fileInfo').style.display = 'block';
+
+    // Read file
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (file.name.endsWith('.json')) {
+            convertJson(e.target.result, file.name);
+        } else if (file.name.endsWith('.zip')) {
+            window.converter.showNotification('Please extract ZIP and upload JSON files individually', 'info');
         } else {
-            reader.readAsText(file);
+            window.converter.showNotification('Please upload .json files only', 'error');
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+function convertJson(jsonText, fileName) {
+    try {
+        const data = JSON.parse(jsonText);
+        const markdown = convertToMarkdown(data);
+        document.getElementById('markdownOutput').value = markdown;
+        document.querySelector('.markdown-output').style.display = 'block';
+        document.getElementById('markdownOutput').focus();
+        window.converter.showNotification(`${fileName} converted successfully!`, 'success');
+    } catch (error) {
+        window.converter.showNotification(`Error converting ${fileName}: ${error.message}`, 'error');
+    }
+}
+
+function convertToMarkdown(data) {
+    const meta = data.meta || {};
+    const textMap = meta.text_map || {};
+    
+    let markdown = '';
+    for (const [key, delta] of Object.entries(textMap)) {
+        markdown += window.converter.parseDelta(delta) + '\n\n';
+    }
+    
+    // If no textMap found, try blocks
+    if (!markdown.trim()) {
+        const blocks = data.blocks || {};
+        for (const [key, block] of Object.entries(blocks)) {
+            if (block.data) {
+                markdown += `[Block: ${block.ty || 'unknown'}]\n`;
+                if (typeof block.data === 'object') {
+                    markdown += JSON.stringify(block.data, null, 2) + '\n';
+                }
+                markdown += '\n';
+            }
         }
     }
+    
+    return markdown.trim();
+}
 
-    function convertJson(jsonText) {
-        try {
-            const data = JSON.parse(jsonText);
-            const markdown = convertToMarkdown(data);
-            document.getElementById('markdownOutput').value = markdown;
-            document.querySelector('.markdown-output').style.display = 'block';
-            window.converter.showNotification('File converted successfully!', 'success');
-        } catch (error) {
-            window.converter.showNotification(`Error: ${error.message}`, 'error');
-        }
+function convertFromText() {
+    const jsonText = document.getElementById('jsonInput').value;
+    if (!jsonText.trim()) {
+        window.converter.showNotification('Please enter JSON text', 'error');
+        return;
+    }
+    convertJson(jsonText, 'pasted_json');
+}
+
+function copyMarkdown() {
+    const output = document.getElementById('markdownOutput');
+    if (!output.value.trim()) {
+        window.converter.showNotification('No markdown to copy', 'error');
+        return;
+    }
+    
+    output.select();
+    document.execCommand('copy');
+    window.converter.showNotification('Markdown copied to clipboard!', 'success');
+}
+
+function downloadMarkdown() {
+    const markdown = document.getElementById('markdownOutput').value;
+    if (!markdown.trim()) {
+        window.converter.showNotification('No markdown to download', 'error');
+        return;
     }
 
-    function convertToMarkdown(data) {
-        // Simplified conversion logic
-        const meta = data.meta || {};
-        const textMap = meta.text_map || {};
-        
-        let markdown = '';
-        for (const [key, delta] of Object.entries(textMap)) {
-            markdown += window.converter.parseDelta(delta) + '\n\n';
-        }
-        
-        return markdown;
-    }
+    const fileName = prompt('Enter file name:', 'appflowy_converted.md') || 'appflowy_converted.md';
+    
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName.endsWith('.md') ? fileName : fileName + '.md';
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
-    function convertFromText() {
-        const jsonText = document.getElementById('jsonInput').value;
-        if (!jsonText.trim()) {
-            window.converter.showNotification('Please enter JSON text', 'error');
-            return;
-        }
-        convertJson(jsonText);
-    }
-
-    function copyMarkdown() {
-        const output = document.getElementById('markdownOutput');
-        output.select();
-        document.execCommand('copy');
-        window.converter.showNotification('Markdown copied to clipboard!', 'success');
-    }
-
-    function downloadMarkdown() {
-        const markdown = document.getElementById('markdownOutput').value;
-        if (!markdown.trim()) {
-            window.converter.showNotification('No markdown to download', 'error');
-            return;
-        }
-
-        const blob = new Blob([markdown], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'appflowy_converted.md';
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function clearAll() {
-        document.getElementById('jsonInput').value = '';
-        document.getElementById('markdownOutput').value = '';
-        document.getElementById('fileInfo').style.display = 'none';
-        document.querySelector('.markdown-output').style.display = 'none';
-        window.converter.showNotification('Cleared all content', 'info');
-    }
-    </script>
-</body>
-</html>
+function clearAll() {
+    document.getElementById('jsonInput').value = '';
+    document.getElementById('markdownOutput').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.querySelector('.markdown-output').style.display = 'none';
+    window.converter.showNotification('Cleared all content', 'info');
+}
