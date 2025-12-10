@@ -3,189 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - AppFlowy JSON to Markdown Converter</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Privacy Policy - AppFlowy to Markdown Converter</title>
     <style>
-        .privacy-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 3rem;
-            margin: 2rem auto;
-            box-shadow: var(--shadow);
+        :root {
+            --ios-bg: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-purple: #7e50b5;
+            --ios-gray: #8e8e93;
+            --ios-gray-light: #c7c7cc;
+            --ios-text: #000000;
+            --ios-text-secondary: #3c3c43;
+            --ios-border: #d1d1d6;
+            --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --ios-radius: 14px;
+            --ios-radius-small: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
+            line-height: 1.5;
+            padding: 20px;
             max-width: 800px;
+            margin: 0 auto;
         }
-        
-        .privacy-container h1 {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
+
+        .container {
+            width: 100%;
+            padding: 0 16px;
         }
-        
-        .privacy-container h2 {
-            color: var(--secondary);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
+
+        /* iOS Cards */
+        .ios-card {
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: var(--ios-shadow);
+            border: 1px solid var(--ios-border);
         }
-        
-        .privacy-container p, .privacy-container ul {
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-            color: var(--dark);
-        }
-        
-        .privacy-container ul {
-            padding-left: 2rem;
-        }
-        
-        .privacy-container li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .back-link {
+
+        /* iOS Buttons */
+        .ios-button {
             display: inline-block;
-            margin-bottom: 2rem;
-            color: var(--primary);
-            text-decoration: none;
+            padding: 12px 24px;
+            background: var(--ios-purple);
+            color: white;
+            border: none;
+            border-radius: var(--ios-radius-small);
+            font-size: 16px;
             font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        
+
+        .ios-button:active {
+            opacity: 0.8;
+        }
+
+        /* iOS List Items */
+        .ios-list-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            background: var(--ios-card);
+            border-bottom: 1px solid var(--ios-border);
+        }
+
+        .ios-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .ios-list-item i {
+            font-size: 18px;
+            color: var(--ios-purple);
+            margin-right: 16px;
+            margin-top: 2px;
+            min-width: 24px;
+        }
+
+        .ios-list-item-content {
+            flex: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 32px 0;
+            border-bottom: 1px solid var(--ios-border);
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: var(--ios-gray);
+            font-size: 17px;
+        }
+
+        /* Sections */
+        .section {
+            margin: 32px 0;
+        }
+
+        .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--ios-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2 i {
+            color: var(--ios-purple);
+        }
+
+        .section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 12px;
+            color: var(--ios-text);
+        }
+
+        .section p {
+            margin-bottom: 16px;
+            color: var(--ios-text-secondary);
+            font-size: 16px;
+        }
+
+        .section ul, .section ol {
+            margin: 16px 0 24px 24px;
+        }
+
+        .section li {
+            margin-bottom: 12px;
+            color: var(--ios-text-secondary);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: rgba(0, 122, 255, 0.08);
+            border-radius: var(--ios-radius);
+            padding: 20px;
+            margin: 24px 0;
+            border-left: 4px solid var(--ios-purple);
+        }
+
+        .highlight-box h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: var(--ios-purple);
+        }
+
+        /* Contact Info */
+        .contact-box {
+            background: rgba(0, 122, 255, 0.05);
+            border-radius: var(--ios-radius);
+            padding: 24px;
+            margin: 32px 0;
+            border: 1px solid var(--ios-border);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--ios-gray);
+            font-size: 14px;
+            border-top: 1px solid var(--ios-border);
+            margin-top: 32px;
+        }
+
+        .footer-links {
+            margin: 16px 0;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--ios-purple);
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ios-purple);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: var(--ios-radius-small);
+            background: rgba(0, 122, 255, 0.1);
+        }
+
         .back-link:hover {
-            text-decoration: underline;
+            background: rgba(0, 122, 255, 0.15);
         }
-        
-        .highlight {
-            background: #f8f9ff;
-            padding: 1.5rem;
-            border-left: 4px solid var(--primary);
-            border-radius: 8px;
-            margin: 2rem 0;
-        }
-        
-        .contact-info {
-            background: #eef2ff;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            margin-top: 3rem;
+
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ios-bg: #000000;
+                --ios-card: #1c1c1e;
+                --ios-purple: #7e50b5;
+                --ios-gray: #8e8e93;
+                --ios-gray-light: #38383a;
+                --ios-text: #ffffff;
+                --ios-text-secondary: #ebebf5;
+                --ios-border: #38383a;
+            }
+            
+            .highlight-box {
+                background: rgba(10, 132, 255, 0.12);
+            }
+            
+            .contact-box {
+                background: rgba(10, 132, 255, 0.08);
+            }
+            
+            .back-link {
+                background: rgba(10, 132, 255, 0.15);
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-shield-alt"></i> Privacy Policy</h1>
-            <p class="subtitle">Your privacy is yours</p>
-        </div>
-    </header>
-
-    <main class="container">
+    <div class="container">
+        <!-- Back Button -->
         <a href="index.html" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Home
+            <i class="fas fa-arrow-left"></i> Back to Converter
         </a>
 
-        <div class="privacy-container">
-            <h1>Privacy Policy</h1>
-            <p><strong>Last Updated:</strong> December 2025</p>
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Privacy Policy</h1>
+            <p>Your privacy is our top priority</p>
+        </div>
+
+        <!-- Important Notice -->
+        <div class="highlight-box">
+            <h3><i class="fas fa-lock"></i> Important Notice</h3>
+            <p><strong>No data is ever uploaded to any server.</strong> All processing happens 100% in your browser. Your files never leave your computer.</p>
+        </div>
+
+        <!-- Privacy Content -->
+        <div class="section">
+            <p><strong>Last Updated:</strong> December 2023</p>
+        </div>
+
+        <!-- 1. Information We Collect -->
+        <div class="section">
+            <h2><i class="fas fa-info-circle"></i> 1. Information We Collect</h2>
+            <p><strong>We collect NO personal information.</strong> Our converter is designed with privacy as the core principle:</p>
             
-            <div class="highlight">
-                <h3><i class="fas fa-lock"></i> Important Notice</h3>
-                <p><strong>No data is ever uploaded to any server.</strong> All processing happens 100% in your browser. Your files never leave your computer.</p>
+            <div class="ios-card">
+                <div class="ios-list-item">
+                    <i class="fas fa-user-slash"></i>
+                    <div class="ios-list-item-content">
+                        <strong>No account registration</strong>
+                        <p>You don't need to sign up or create an account</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-file-export"></i>
+                    <div class="ios-list-item-content">
+                        <strong>No file uploads</strong>
+                        <p>Files stay on your device and are processed locally</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-ban"></i>
+                    <div class="ios-list-item-content">
+                        <strong>No tracking</strong>
+                        <p>We don't use cookies, analytics, or tracking scripts</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-database"></i>
+                    <div class="ios-list-item-content">
+                        <strong>No data collection</strong>
+                        <p>We don't store any information about you or your files</p>
+                    </div>
+                </div>
             </div>
-            
-            <h2>1. Information Collected</h2>
-            <p><strong>Collect NO personal information.</strong> Our converter is designed with privacy as the core principle:</p>
-            <ul>
-                <li><strong>No account registration</strong> - You don't need to sign up</li>
-                <li><strong>No file uploads</strong> - Files stay on your device</li>
-                <li><strong>No tracking</strong> - We don't use cookies or analytics</li>
-                <li><strong>No data collection</strong> - We don't store any information</li>
-            </ul>
-            
-            <h2>2. How Our Converter Works</h2>
+        </div>
+
+        <!-- 2. How Our Converter Works -->
+        <div class="section">
+            <h2><i class="fas fa-cogs"></i> 2. How Our Converter Works</h2>
             <p>The AppFlowy to Markdown Converter operates entirely client-side:</p>
-            <ol>
-                <li>You select files from your computer</li>
-                <li>Files are read directly in your browser</li>
-                <li>Conversion happens locally on your device</li>
-                <li>You download the converted files</li>
-                <li>All temporary data is cleared when you close the page</li>
-            </ol>
             
-            <h2>3. Third-Party Services</h2>
-            <p>We use minimal third-party services:</p>
-            <ul>
-                <li><strong>GitHub Pages</strong> - For hosting the static website</li>
-                <li><strong>Font Awesome</strong> - For icons (loaded from CDN)</li>
-                <li><strong>JSZip Library</strong> - For creating ZIP files (loaded from CDN)</li>
-            </ul>
-            <p>These services may have their own privacy policies, but they don't receive any of your file data.</p>
+            <div class="ios-card">
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-weight: 600;">1</div>
+                    <div>
+                        <strong>You select files</strong>
+                        <p>Choose .json files from your computer or drag & drop</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-weight: 600;">2</div>
+                    <div>
+                        <strong>Local processing</strong>
+                        <p>Files are read directly in your browser using JavaScript</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-weight: 600;">3</div>
+                    <div>
+                        <strong>In-browser conversion</strong>
+                        <p>JSON to Markdown conversion happens on your device</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="background: var(--ios-purple); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-weight: 600;">4</div>
+                    <div>
+                        <strong>Download results</strong>
+                        <p>Converted files are downloaded back to your computer</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="background: var(--ios-purple); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-weight: 600;">5</div>
+                    <div>
+                        <strong>Automatic cleanup</strong>
+                        <p>All temporary data is cleared when you close the page</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Third-Party Services -->
+        <div class="section">
+            <h2><i class="fas fa-external-link-alt"></i> 3. Third-Party Services</h2>
+            <p>We use minimal third-party services to enhance functionality:</p>
             
-            <h2>4. Cookies</h2>
-            <p>We do not use cookies for tracking. The website may use:</p>
-            <ul>
-                <li><strong>Session storage</strong> - To remember your file selections while using the converter (cleared when you close the tab)</li>
-                <li><strong>Local storage</strong> - To save your preferences like dark mode (optional)</li>
-            </ul>
-            
-            <h2>5. Children's Privacy</h2>
-            <p>This service is suitable for all ages. Since we don't collect any personal information, there are no special considerations for children's privacy.</p>
-            
-            <h2>6. Changes to This Policy</h2>
-            <p>I may update this privacy policy from time to time. The latest version will always be available on this page with the updated date.</p>
-            
-            <h2>7. Open Source Transparency</h2>
-            <p>This converter is open source. You can:</p>
-            <ul>
-                <li>View the complete source code on GitHub</li>
-                <li>Verify that no data collection occurs</li>
-                <li>Self-host your own instance</li>
-                <li>Audit the code for security</li>
-            </ul>
-            
-            <div class="contact-info">
-                <h2><i class="fas fa-envelope"></i> Contact Information</h2>
-                <p>If you have questions about this privacy policy, you can:</p>
-                <ul>
-                    <li>Open an issue on my <a href="https://lildavegoth.github.io/Appflowy-JSON-to-Markdown-Converter/" target="_blank">GitHub repository</a></li>
-                    <li>Contact the maintainer through GitHub</li>
-                </ul>
-                <p><strong>Note:</strong> This is an open-source project maintained by lildavegoth.</p>
+            <div class="ios-card">
+                <div class="ios-list-item">
+                    <i class="fab fa-github"></i>
+                    <div class="ios-list-item-content">
+                        <strong>GitHub Pages</strong>
+                        <p>For hosting the static website (no server-side processing)</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fab fa-font-awesome"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Font Awesome</strong>
+                        <p>For icons (loaded from CDN, no access to your data)</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-file-archive"></i>
+                    <div class="ios-list-item-content">
+                        <strong>JSZip Library</strong>
+                        <p>For creating ZIP files (loaded from CDN)</p>
+                    </div>
+                </div>
             </div>
             
-            <p style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #dee2e6; text-align: center;">
-                <i class="fas fa-heart" style="color: #e74c3c;"></i> Built with respect for your privacy
+            <p>These services may have their own privacy policies, but they don't receive any of your file data.</p>
+        </div>
+
+        <!-- 4. Cookies -->
+        <div class="section">
+            <h2><i class="fas fa-cookie-bite"></i> 4. Cookies & Storage</h2>
+            <p>We do not use cookies for tracking. The website may use:</p>
+            
+            <div class="ios-card">
+                <div class="ios-list-item">
+                    <i class="fas fa-hourglass-half"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Session storage</strong>
+                        <p>To remember your file selections while using the converter (cleared when you close the tab)</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-moon"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Local storage</strong>
+                        <p>Optional: To save your preferences like dark mode (you can clear this anytime)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Children's Privacy -->
+        <div class="section">
+            <h2><i class="fas fa-child"></i> 5. Children's Privacy</h2>
+            <p>Our service is suitable for all ages. Since we don't collect any personal information, there are no special considerations for children's privacy.</p>
+        </div>
+
+        <!-- 6. Changes to This Policy -->
+        <div class="section">
+            <h2><i class="fas fa-history"></i> 6. Changes to This Policy</h2>
+            <p>We may update this privacy policy from time to time. The latest version will always be available on this page with the updated date.</p>
+        </div>
+
+        <!-- 7. Open Source Transparency -->
+        <div class="section">
+            <h2><i class="fas fa-code"></i> 7. Open Source Transparency</h2>
+            <p>This converter is open source. You can verify our privacy claims by:</p>
+            
+            <div class="ios-card">
+                <div class="ios-list-item">
+                    <i class="fas fa-eye"></i>
+                    <div class="ios-list-item-content">
+                        <strong>View the complete source code</strong>
+                        <p>All code is available on GitHub for inspection</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-search"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Verify no data collection</strong>
+                        <p>Audit the code to confirm no external data transmission</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-server"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Self-host your own instance</strong>
+                        <p>Run the converter on your own server for maximum control</p>
+                    </div>
+                </div>
+                
+                <div class="ios-list-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="ios-list-item-content">
+                        <strong>Audit for security</strong>
+                        <p>Review the codebase for any security concerns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="contact-box">
+            <h2><i class="fas fa-envelope"></i> Contact Information</h2>
+            <p>If you have questions about this privacy policy, you can:</p>
+            
+            <div style="margin: 20px 0;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <i class="fab fa-github" style="color: var(--ios-purple);"></i>
+                    <div>
+                        <strong>Open an issue on GitHub</strong>
+                        <p style="margin-top: 4px; font-size: 14px;">Report questions or concerns directly in the repository</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fab fa-telegram" style="color: var(--ios-purple);"></i>
+                    <div>
+                        <strong>Contact the maintainer</strong>
+                        <p style="margin-top: 4px; font-size: 14px;">Reach out to lildavegoth on Telegram</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--ios-border); font-size: 14px; color: var(--ios-gray);">
+                <strong>Note:</strong> This is an open-source project maintained by volunteers.
             </p>
         </div>
-    </main>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>AppFlowy Markdown Converter</h3>
-                    <p>Free, open-source, privacy-focused tool.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="single.html">Single Converter</a></li>
-                        <li><a href="batch.html">Batch Converter</a></li>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Open Source</h3>
-                    <p>View and contribute to the code on GitHub.</p>
-                </div>
+        <!-- Footer -->
+        <div class="footer">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;">
+                <i class="fas fa-heart" style="color: #ff2d55;"></i>
+                <span>Built with respect for your privacy</span>
             </div>
-            <div class="footer-bottom">
-                <p>Made with ❤️ for the AppFlowy community | Privacy First Design</p>
+            
+            <div class="footer-links">
+                <a href="index.html">Converter</a>
+                <a href="https://github.com/appflowy-io/appflowy" target="_blank">AppFlowy</a>
+                <a href="https://t.me/lildavegoth" target="_blank">Contact</a>
             </div>
+            
+            <p style="margin-top: 24px; font-size: 13px;">
+                100% browser-based • No data leaves your device • No registration required
+            </p>
         </div>
-    </footer>
-
-    <script src="script.js"></script>
+    </div>
 </body>
 </html>
