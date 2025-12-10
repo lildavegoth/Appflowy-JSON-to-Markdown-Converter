@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batch Converter - AppFlowy to Markdown</title>
+    <title>Batch Converter - AppFlowy JSON to Markdown</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -146,6 +146,10 @@
             font-size: 0.9rem;
             color: var(--gray);
         }
+        
+        #fileInput {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -170,10 +174,10 @@
                 <h3>Drop your files here</h3>
                 <p>or click to select multiple files</p>
                 <p class="small" style="color: var(--gray); margin-top: 1rem;">
-                    <i class="fas fa-info-circle"></i> Supports: .json, .zip (extracts automatically)
+                    <i class="fas fa-info-circle"></i> Supports: .json files from AppFlowy backup
                 </p>
             </div>
-            <input type="file" id="fileInput" multiple accept=".json,.zip" style="display:none;">
+            <input type="file" id="fileInput" multiple accept=".json">
 
             <div class="stats" id="stats" style="display: none;">
                 <div class="stat">
@@ -218,7 +222,7 @@
                     <h3><i class="fas fa-download"></i> From AppFlowy</h3>
                     <ol style="line-height: 1.8; padding-left: 1.2rem;">
                         <li>Open AppFlowy Settings</li>
-                        <li>Go to "Backup"</li>
+                        <li>Go to "Backup" section</li>
                         <li>Click "Export as ZIP"</li>
                         <li>Extract the ZIP file</li>
                     </ol>
@@ -250,89 +254,116 @@
         const fileInput = document.getElementById('fileInput');
 
         // Click to select files
-        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('click', function() {
+            fileInput.click();
+        });
 
-        // File selection handler
-        fileInput.addEventListener('change', handleFileSelection);
+        // File selection handler - FIXED
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files.length > 0) {
+                console.log('Files selected:', this.files.length);
+                handleFiles(this.files);
+            }
+        });
 
         // Drag and drop handlers
-        dropZone.addEventListener('dragover', (e) => {
+        dropZone.addEventListener('dragover', function(e) {
             e.preventDefault();
-            dropZone.classList.add('dragover');
+            e.stopPropagation();
+            this.classList.add('dragover');
         });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
         });
 
-        dropZone.addEventListener('drop', (e) => {
+        dropZone.addEventListener('drop', function(e) {
             e.preventDefault();
-            dropZone.classList.remove('dragover');
-            handleFileSelection(e.dataTransfer);
+            e.stopPropagation();
+            this.classList.remove('dragover');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                console.log('Files dropped:', e.dataTransfer.files.length);
+                handleFiles(e.dataTransfer.files);
+            }
         });
     });
 
-    function handleFileSelection(event) {
-        const files = event.files || event.dataTransfer.files;
-        if (!files || files.length === 0) return;
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+    function handleFiles(fileList) {
+        console.log('handleFiles called with', fileList.length, 'files');
+        
+        for (let i = 0; i < fileList.length; i++) {
+            const file = fileList[i];
             
-            // Check if it's a supported file type
-            if (file.name.endsWith('.json') || file.name.endsWith('.zip')) {
+            // Check if it's a JSON file
+            if (file.name.toLowerCase().endsWith('.json')) {
+                console.log('Processing JSON file:', file.name);
+                
+                // Check if file already exists
+                if (filesData.some(f => f.name === file.name)) {
+                    window.converter.showNotification(`File already added: ${file.name}`, 'error');
+                    continue;
+                }
+                
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
+                    console.log('File read successfully:', file.name);
                     filesData.push({
                         name: file.name,
                         size: (file.size / 1024).toFixed(2) + ' KB',
                         content: e.target.result,
-                        type: file.type,
-                        isZip: file.name.endsWith('.zip')
+                        type: 'json'
                     });
                     
                     updateFileList();
                     updateStats();
+                    window.converter.showNotification(`Added: ${file.name}`, 'success');
                 };
                 
-                if (file.name.endsWith('.zip')) {
-                    reader.readAsArrayBuffer(file);
-                } else {
-                    reader.readAsText(file);
-                }
+                reader.onerror = function() {
+                    console.error('Error reading file:', file.name);
+                    window.converter.showNotification(`Error reading: ${file.name}`, 'error');
+                };
+                
+                reader.readAsText(file);
             } else {
-                window.converter.showNotification(`Skipped: ${file.name} (not a .json or .zip file)`, 'error');
+                console.log('Skipping non-JSON file:', file.name);
+                window.converter.showNotification(`Skipped: ${file.name} (not a .json file)`, 'error');
             }
         }
     }
 
     function updateFileList() {
         const fileListDiv = document.getElementById('fileList');
+        const statsDiv = document.getElementById('stats');
         
         if (filesData.length === 0) {
             fileListDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No files selected yet</p>';
-            document.getElementById('stats').style.display = 'none';
+            statsDiv.style.display = 'none';
             return;
         }
         
-        fileListDiv.innerHTML = '';
-        document.getElementById('stats').style.display = 'flex';
+        let html = '<h4>Selected Files:</h4>';
         
         filesData.forEach((file, index) => {
-            const div = document.createElement('div');
-            div.className = 'file-item';
-            div.innerHTML = `
-                <div>
-                    <strong>${file.name}</strong><br>
-                    <small>${file.size} ${file.isZip ? '(ZIP Archive)' : ''}</small>
+            html += `
+                <div class="file-item">
+                    <div>
+                        <strong>${file.name}</strong><br>
+                        <small>${file.size}</small>
+                    </div>
+                    <button onclick="removeFile(${index})" style="background: transparent; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button onclick="removeFile(${index})" style="background: transparent; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
-                    <i class="fas fa-times"></i>
-                </button>
             `;
-            fileListDiv.appendChild(div);
         });
+        
+        fileListDiv.innerHTML = html;
+        statsDiv.style.display = 'flex';
     }
 
     function updateStats() {
@@ -342,12 +373,16 @@
     }
 
     function removeFile(index) {
+        const removedFile = filesData[index];
         filesData.splice(index, 1);
         updateFileList();
         updateStats();
+        window.converter.showNotification(`Removed: ${removedFile.name}`, 'info');
     }
 
     function convertAll() {
+        console.log('convertAll called, filesData length:', filesData.length);
+        
         if (filesData.length === 0) {
             window.converter.showNotification('Please select files first!', 'error');
             return;
@@ -356,56 +391,53 @@
         const convertBtn = document.getElementById('convertBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
+        const resultsDiv = document.getElementById('results');
+        const downloadBtn = document.getElementById('downloadBtn');
         
         convertBtn.disabled = true;
         convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
         progressBar.style.display = 'block';
+        progressFill.style.width = '0%';
         conversionResults = [];
+        downloadBtn.style.display = 'none';
         
-        const resultsDiv = document.getElementById('results');
         resultsDiv.innerHTML = '<h3>Conversion Results:</h3>';
 
         let processedCount = 0;
+        const totalFiles = filesData.length;
+
+        console.log('Starting conversion of', totalFiles, 'files');
 
         // Process each file
         filesData.forEach((file, index) => {
             setTimeout(() => {
+                console.log('Processing file:', file.name);
+                
                 try {
-                    let markdown = '';
+                    // Parse JSON
+                    const data = JSON.parse(file.content);
                     
-                    if (file.isZip) {
-                        // Handle ZIP files
-                        markdown = '# ZIP file detected\nPlease extract and upload individual JSON files.';
-                        conversionResults.push({
-                            name: file.name,
-                            success: false,
-                            error: 'ZIP files need to be extracted first',
-                            markdown: markdown
-                        });
-                    } else {
-                        // Handle JSON files
-                        const data = JSON.parse(file.content);
-                        markdown = convertToMarkdown(data);
-                        
-                        conversionResults.push({
-                            name: file.name,
-                            success: true,
-                            error: null,
-                            markdown: markdown
-                        });
-                    }
+                    // Convert to markdown
+                    const markdown = convertToMarkdown(data);
+                    
+                    // Store result
+                    conversionResults.push({
+                        name: file.name,
+                        success: true,
+                        markdown: markdown
+                    });
 
-                    // Update UI
+                    // Update progress
                     processedCount++;
-                    const progressPercent = (processedCount / filesData.length) * 100;
+                    const progressPercent = (processedCount / totalFiles) * 100;
                     progressFill.style.width = `${progressPercent}%`;
                     
                     // Show result
                     const resultDiv = document.createElement('div');
-                    resultDiv.className = `result-item ${file.isZip ? 'error' : 'success'}`;
+                    resultDiv.className = 'result-item success';
                     resultDiv.innerHTML = `
                         <strong>${file.name}</strong>
-                        <div>${file.isZip ? '❌ Need extraction' : '✅ Converted successfully'}</div>
+                        <div>✅ Converted successfully</div>
                     `;
                     resultsDiv.appendChild(resultDiv);
 
@@ -413,31 +445,47 @@
                     updateStats();
 
                     // If all done
-                    if (processedCount === filesData.length) {
+                    if (processedCount === totalFiles) {
+                        console.log('All files processed');
                         convertBtn.disabled = false;
                         convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
-                        document.getElementById('downloadBtn').style.display = 'inline-block';
+                        downloadBtn.style.display = 'inline-block';
                         
                         const successCount = conversionResults.filter(r => r.success).length;
-                        window.converter.showNotification(`Converted ${successCount} of ${filesData.length} files successfully!`, 'success');
+                        window.converter.showNotification(`Converted ${successCount}/${totalFiles} files successfully!`, 'success');
                     }
                 } catch (error) {
+                    console.error('Error converting file:', file.name, error);
+                    
                     conversionResults.push({
                         name: file.name,
                         success: false,
-                        error: error.message,
-                        markdown: ''
+                        error: error.message
                     });
                     
                     processedCount++;
+                    
+                    // Show error result
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result-item error';
+                    resultDiv.innerHTML = `
+                        <strong>${file.name}</strong>
+                        <div>❌ Error: ${error.message.substring(0, 100)}...</div>
+                    `;
+                    resultsDiv.appendChild(resultDiv);
+                    
                     updateStats();
                     
-                    if (processedCount === filesData.length) {
+                    if (processedCount === totalFiles) {
                         convertBtn.disabled = false;
                         convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
+                        
+                        const successCount = conversionResults.filter(r => r.success).length;
+                        window.converter.showNotification(`Finished: ${successCount}/${totalFiles} files converted`, 
+                            successCount > 0 ? 'success' : 'error');
                     }
                 }
-            }, index * 100); // Stagger processing
+            }, index * 500); // Stagger processing
         });
     }
 
@@ -450,17 +498,7 @@
             markdown += window.converter.parseDelta(delta) + '\n\n';
         }
         
-        // If no textMap found, try to extract from blocks
-        if (!markdown.trim()) {
-            const blocks = data.blocks || {};
-            for (const [key, block] of Object.entries(blocks)) {
-                if (block.data && typeof block.data === 'object') {
-                    markdown += JSON.stringify(block.data, null, 2) + '\n\n';
-                }
-            }
-        }
-        
-        return markdown.trim();
+        return markdown.trim() || '# Empty file\nNo content found in this file.';
     }
 
     function downloadAll() {
@@ -471,10 +509,12 @@
             return;
         }
 
+        console.log('Creating ZIP with', successfulResults.length, 'files');
+
         const zip = new JSZip();
         
         successfulResults.forEach(result => {
-            const mdName = result.name.replace('.json', '.md').replace('.JSON', '.md');
+            const mdName = result.name.replace(/\.json$/i, '.md');
             zip.file(mdName, result.markdown);
         });
 
@@ -483,33 +523,46 @@
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
                 link.download = "appflowy_converted_notes.zip";
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
                 URL.revokeObjectURL(link.href);
                 
                 window.converter.showNotification(`Downloaded ${successfulResults.length} files as ZIP`, 'success');
             })
             .catch(function(error) {
+                console.error('ZIP creation error:', error);
                 window.converter.showNotification('Error creating ZIP: ' + error.message, 'error');
             });
     }
 
     function clearAll() {
-        if (filesData.length > 0 && !confirm('Are you sure you want to clear all files?')) {
+        if (filesData.length > 0 && !confirm('Clear all files and results?')) {
             return;
         }
         
         filesData = [];
         conversionResults = [];
-        document.getElementById('fileList').innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No files selected yet</p>';
-        document.getElementById('results').innerHTML = '';
-        document.getElementById('stats').style.display = 'none';
-        document.getElementById('downloadBtn').style.display = 'none';
-        document.getElementById('progressBar').style.display = 'none';
-        document.getElementById('convertBtn').disabled = false;
-        document.getElementById('convertBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
         
-        window.converter.showNotification('Cleared all files and results', 'info');
+        const fileListDiv = document.getElementById('fileList');
+        const resultsDiv = document.getElementById('results');
+        const statsDiv = document.getElementById('stats');
+        const progressBar = document.getElementById('progressBar');
+        const convertBtn = document.getElementById('convertBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const fileInput = document.getElementById('fileInput');
+        
+        fileListDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No files selected yet</p>';
+        resultsDiv.innerHTML = '';
+        statsDiv.style.display = 'none';
+        progressBar.style.display = 'none';
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
+        downloadBtn.style.display = 'none';
+        fileInput.value = '';
+        
+        window.converter.showNotification('Cleared all files', 'info');
     }
     </script>
 </body>
-</html>
+    </html>
