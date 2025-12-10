@@ -20,9 +20,9 @@ A free, open-source web tool to convert AppFlowy backup files to Markdown format
 2. Drag and drop your AppFlowy `.json` files
 3. Download the converted Markdown files
 
-### Self-Hosted Version (Offline Private)
-1. Download index.html
-2. Open `index.html` in your browser
+### Offline Version
+1. Download `single.html` or `batch.html`
+2. Open them in/use browser apps
 3. Use it without data charged
 
 ## Getting Your AppFlowy Files
@@ -33,21 +33,16 @@ A free, open-source web tool to convert AppFlowy backup files to Markdown format
 4. Download and extract the ZIP file on your computer
 5. Find the `.json` files in the extracted folder
 
-## Supported Formats
+## Supported Format
 
-- AppFlowy Backup ZIP files
 - Individual JSON files
 
 ## Development
 
 Want to contribute or customize?
 
-Created with ❤️ For AppFlowy Community
+Made with ❤️ for the AppFlowy community | Privacy First Design
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/appflowy-markdown-converter.git
-
-# Open in browser
-cd appflowy-markdown-converter
-# Open index.html in your browser
+git clone https://github.com/lildavegoth/Appflowy-JSON-to-Markdown-Converter.git
