@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Converter - AppFlowy to Markdown</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .converter-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem auto;
+            box-shadow: var(--shadow);
+        }
+
+        .drop-zone {
+            border: 3px dashed var(--primary);
+            border-radius: var(--border-radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            cursor: pointer;
+            background: #f8f9ff;
+            transition: var(--transition);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            background: #eef2ff;
+            border-color: var(--secondary);
+        }
+
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .file-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .results {
+            margin: 2rem 0;
+        }
+
+        .result-item {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .success { border-left-color: #28a745 !important; }
+        .error { border-left-color: #dc3545 !important; }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: var(--border-radius);
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin: 1rem 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-folder"></i> Batch File Converter</h1>
+            <p class="subtitle">Convert multiple AppFlowy files at once</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="converter-container">
+            <h2>📁 Upload Multiple Files</h2>
+            <p>Drag and drop or click to select multiple .json files</p>
+
+            <div class="drop-zone" id="dropZone">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h3>Drop your files here</h3>
+                <p>or click to select multiple files</p>
+                <p class="small" style="color: var(--gray); margin-top: 1rem;">
+                    <i class="fas fa-info-circle"></i> Supports: .json, .zip (extracts automatically)
+                </p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".json,.zip" style="display:none;">
+
+            <div class="stats" id="stats" style="display: none;">
+                <div class="stat">
+                    <div class="stat-value" id="totalFiles">0</div>
+                    <div class="stat-label">Total Files</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="processedFiles">0</div>
+                    <div class="stat-label">Processed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="successFiles">0</div>
+                    <div class="stat-label">Success</div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div id="fileList" class="file-list"></div>
+
+            <div class="action-buttons">
+                <button onclick="convertAll()" class="btn btn-primary" id="convertBtn">
+                    <i class="fas fa-sync-alt"></i> Convert All Files
+                </button>
+                <button onclick="clearAll()" class="btn">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+                <button onclick="downloadAll()" class="btn btn-secondary" id="downloadBtn" style="display: none;">
+                    <i class="fas fa-download"></i> Download All as ZIP
+                </button>
+            </div>
+
+            <div id="results" class="results"></div>
+        </div>
+
+        <div class="converter-container">
+            <h2>📋 How to Get Files</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div>
+                    <h3><i class="fas fa-download"></i> From AppFlowy</h3>
+                    <ol style="line-height: 1.8; padding-left: 1.2rem;">
+                        <li>Open AppFlowy Settings</li>
+                        <li>Go to "Backup"</li>
+                        <li>Click "Export as ZIP"</li>
+                        <li>Extract the ZIP file</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3><i class="fas fa-folder-open"></i> Find JSON Files</h3>
+                    <ul style="line-height: 1.8; padding-left: 1.2rem;">
+                        <li>Open extracted folder</li>
+                        <li>Look for .json files</li>
+                        <li>Select all files at once</li>
+                        <li>Drag them here</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include JSZip library for ZIP creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <script src="script.js"></script>
+    <script>
+    // Batch converter specific JavaScript
+    let filesData = [];
+    let conversionResults = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        // Click to select files
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // File selection handler
+        fileInput.addEventListener('change', handleFileSelection);
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFileSelection(e.dataTransfer);
+        });
+    });
+
+    function handleFileSelection(event) {
+        const files = event.files || event.dataTransfer.files;
+        if (!files || files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Check if it's a supported file type
+            if (file.name.endsWith('.json') || file.name.endsWith('.zip')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    filesData.push({
+                        name: file.name,
+                        size: (file.size / 1024).toFixed(2) + ' KB',
+                        content: e.target.result,
+                        type: file.type,
+                        isZip: file.name.endsWith('.zip')
+                    });
+                    
+                    updateFileList();
+                    updateStats();
+                };
+                
+                if (file.name.endsWith('.zip')) {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            } else {
+                window.converter.showNotification(`Skipped: ${file.name} (not a .json or .zip file)`, 'error');
+            }
+        }
+    }
+
+    function updateFileList() {
+        const fileListDiv = document.getElementById('fileList');
+        
+        if (filesData.length === 0) {
+            fileListDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No files selected yet</p>';
+            document.getElementById('stats').style.display = 'none';
+            return;
+        }
+        
+        fileListDiv.innerHTML = '';
+        document.getElementById('stats').style.display = 'flex';
+        
+        filesData.forEach((file, index) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <div>
+                    <strong>${file.name}</strong><br>
+                    <small>${file.size} ${file.isZip ? '(ZIP Archive)' : ''}</small>
+                </div>
+                <button onclick="removeFile(${index})" style="background: transparent; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            fileListDiv.appendChild(div);
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('totalFiles').textContent = filesData.length;
+        document.getElementById('processedFiles').textContent = conversionResults.length;
+        document.getElementById('successFiles').textContent = conversionResults.filter(r => r.success).length;
+    }
+
+    function removeFile(index) {
+        filesData.splice(index, 1);
+        updateFileList();
+        updateStats();
+    }
+
+    function convertAll() {
+        if (filesData.length === 0) {
+            window.converter.showNotification('Please select files first!', 'error');
+            return;
+        }
+
+        const convertBtn = document.getElementById('convertBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        
+        convertBtn.disabled = true;
+        convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+        progressBar.style.display = 'block';
+        conversionResults = [];
+        
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '<h3>Conversion Results:</h3>';
+
+        let processedCount = 0;
+
+        // Process each file
+        filesData.forEach((file, index) => {
+            setTimeout(() => {
+                try {
+                    let markdown = '';
+                    
+                    if (file.isZip) {
+                        // Handle ZIP files
+                        markdown = '# ZIP file detected\nPlease extract and upload individual JSON files.';
+                        conversionResults.push({
+                            name: file.name,
+                            success: false,
+                            error: 'ZIP files need to be extracted first',
+                            markdown: markdown
+                        });
+                    } else {
+                        // Handle JSON files
+                        const data = JSON.parse(file.content);
+                        markdown = convertToMarkdown(data);
+                        
+                        conversionResults.push({
+                            name: file.name,
+                            success: true,
+                            error: null,
+                            markdown: markdown
+                        });
+                    }
+
+                    // Update UI
+                    processedCount++;
+                    const progressPercent = (processedCount / filesData.length) * 100;
+                    progressFill.style.width = `${progressPercent}%`;
+                    
+                    // Show result
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `result-item ${file.isZip ? 'error' : 'success'}`;
+                    resultDiv.innerHTML = `
+                        <strong>${file.name}</strong>
+                        <div>${file.isZip ? '❌ Need extraction' : '✅ Converted successfully'}</div>
+                    `;
+                    resultsDiv.appendChild(resultDiv);
+
+                    // Update stats
+                    updateStats();
+
+                    // If all done
+                    if (processedCount === filesData.length) {
+                        convertBtn.disabled = false;
+                        convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
+                        document.getElementById('downloadBtn').style.display = 'inline-block';
+                        
+                        const successCount = conversionResults.filter(r => r.success).length;
+                        window.converter.showNotification(`Converted ${successCount} of ${filesData.length} files successfully!`, 'success');
+                    }
+                } catch (error) {
+                    conversionResults.push({
+                        name: file.name,
+                        success: false,
+                        error: error.message,
+                        markdown: ''
+                    });
+                    
+                    processedCount++;
+                    updateStats();
+                    
+                    if (processedCount === filesData.length) {
+                        convertBtn.disabled = false;
+                        convertBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
+                    }
+                }
+            }, index * 100); // Stagger processing
+        });
+    }
+
+    function convertToMarkdown(data) {
+        const meta = data.meta || {};
+        const textMap = meta.text_map || {};
+        
+        let markdown = '';
+        for (const [key, delta] of Object.entries(textMap)) {
+            markdown += window.converter.parseDelta(delta) + '\n\n';
+        }
+        
+        // If no textMap found, try to extract from blocks
+        if (!markdown.trim()) {
+            const blocks = data.blocks || {};
+            for (const [key, block] of Object.entries(blocks)) {
+                if (block.data && typeof block.data === 'object') {
+                    markdown += JSON.stringify(block.data, null, 2) + '\n\n';
+                }
+            }
+        }
+        
+        return markdown.trim();
+    }
+
+    function downloadAll() {
+        const successfulResults = conversionResults.filter(r => r.success);
+        
+        if (successfulResults.length === 0) {
+            window.converter.showNotification('No successful conversions to download', 'error');
+            return;
+        }
+
+        const zip = new JSZip();
+        
+        successfulResults.forEach(result => {
+            const mdName = result.name.replace('.json', '.md').replace('.JSON', '.md');
+            zip.file(mdName, result.markdown);
+        });
+
+        zip.generateAsync({ type: "blob" })
+            .then(function(content) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "appflowy_converted_notes.zip";
+                link.click();
+                URL.revokeObjectURL(link.href);
+                
+                window.converter.showNotification(`Downloaded ${successfulResults.length} files as ZIP`, 'success');
+            })
+            .catch(function(error) {
+                window.converter.showNotification('Error creating ZIP: ' + error.message, 'error');
+            });
+    }
+
+    function clearAll() {
+        if (filesData.length > 0 && !confirm('Are you sure you want to clear all files?')) {
+            return;
+        }
+        
+        filesData = [];
+        conversionResults = [];
+        document.getElementById('fileList').innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No files selected yet</p>';
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('stats').style.display = 'none';
+        document.getElementById('downloadBtn').style.display = 'none';
+        document.getElementById('progressBar').style.display = 'none';
+        document.getElementById('convertBtn').disabled = false;
+        document.getElementById('convertBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Convert All Files';
+        
+        window.converter.showNotification('Cleared all files and results', 'info');
+    }
+    </script>
+</body>
+</html>
